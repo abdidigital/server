@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Player WebApp</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    input {
+      width: 90%;
+      padding: 12px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #ff0000;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .video-result {
+      margin-top: 20px;
+    }
+    iframe {
+      width: 100%;
+      height: 300px;
+      border: none;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+    .thumbnail {
+      width: 100%;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+    .title {
+      font-weight: bold;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔎 Cari dan Putar Video YouTube</h2>
+  <input type="text" id="searchInput" placeholder="Ketik judul video YouTube..." />
+  <button onclick="searchYouTube()">Cari</button>
+
+  <div id="result" class="video-result"></div>
+
+  <script>
+    Telegram.WebApp.ready();
+
+    const apiKey = "AIzaSyBXEhmJ_a91vXpSiSnkRpi6_WbVTL2Vz0A"; // API Key YouTube kamu
+
+    async function searchYouTube() {
+      const query = document.getElementById("searchInput").value.trim();
+      const resultDiv = document.getElementById("result");
+
+      if (!query) {
+        alert("Masukkan kata kunci pencarian!");
+        return;
+      }
+
+      resultDiv.innerHTML = "Mencari...";
+
+      try {
+        const res = await fetch(
+          `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(query)}&key=${apiKey}`
+        );
+        const data = await res.json();
+
+        if (data.items && data.items.length > 0) {
+          const video = data.items[0];
+          const videoId = video.id.videoId;
+          const title = video.snippet.title;
+          const thumbnail = video.snippet.thumbnails.medium.url;
+
+          resultDiv.innerHTML = `
+            <img class="thumbnail" src="${thumbnail}" alt="Thumbnail" />
+            <div class="title">${title}</div>
+            <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+          `;
+        } else {
+          resultDiv.innerHTML = "Video tidak ditemukan.";
+        }
+      } catch (error) {
+        console.error(error);
+        resultDiv.innerHTML = "Gagal memuat video.";
+      }
+    }
+  </script>
+</body>
+</html>
